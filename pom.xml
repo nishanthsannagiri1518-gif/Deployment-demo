@@ -104,6 +104,8 @@
         <sonar.projectName>tomcat-demo</sonar.projectName>
         <sonar.sources>src/main/java,src/main/webapp</sonar.sources>
         <sonar.tests>src/test/java</sonar.tests>
+        <sonar.host.url>http://http://13.218.124.180:9000/</sonar.host.url>
+        <sonar.token>squ_e9cb64f2c3ec74c2996f91dde220efe11aae8a8c</sonar.token>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
         <sonar.java.binaries>target/classes</sonar.java.binaries>
@@ -114,14 +116,14 @@
   <!-- Nexus (replace with your server details) -->
   <distributionManagement>
     <repository>
-      <id>nexus-releases</id>
+      <id>nexus</id>
       <name>Nexus Releases</name>
-      <url>http://your-nexus-host:8081/repository/maven-releases</url>
+      <url>http://13.218.40.156:8081/repository/flipkart-release/</url>
     </repository>
     <snapshotRepository>
-      <id>nexus-snapshots</id>
+      <id>nexus</id>
       <name>Nexus Snapshots</name>
-      <url>http://your-nexus-host:8081/repository/maven-snapshots</url>
+      <url>http://13.218.40.156:8081/repository/flipkart-snapshot/</url>
     </snapshotRepository>
   </distributionManagement>
 </project>
