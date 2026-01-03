@@ -1,0 +1,77 @@
+pipeline {
+  agent any
+
+  environment {
+    MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+    // Set these in Jenkins credentials
+    SONAR_HOST_URL = credentials('sonar-host-url') // e.g., https://sonar.yourdomain
+    SONAR_TOKEN = credentials('sonar-token')
+    NEXUS_USER = credentials('nexus-user')
+    NEXUS_PASS = credentials('nexus-pass')
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build & Test') {
+      steps {
+        sh 'mvn -B clean verify'
+      }
+      post {
+        always {
+          junit 'target/surefire-reports/*.xml'
+        }
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        withEnv(["SONAR_SCANNER_OPTS=-Xmx512m"]) {
+          sh """
+            mvn -B sonar:sonar \
+              -Dsonar.host.url=${SONAR_HOST_URL} \
+              -Dsonar.login=${SONAR_TOKEN}
+          """
+        }
+      }
+    }
+
+    stage('Publish to Nexus') {
+      steps {
+        sh """
+          mvn -B deploy \
+            -Dnexus.username=${NEXUS_USER} \
+            -Dnexus.password=${NEXUS_PASS}
+        """
+      }
+    }
+
+    stage('Deploy to Tomcat') {
+      steps {
+        // Option 1: copy WAR to Tomcat webapps via SSH
+        sh """
+          scp target/tomcat-demo.war user@tomcat-host:/opt/tomcat/webapps/
+        """
+        // Option 2: if using Tomcat Manager, uncomment and configure:
+        // sh """
+        //   curl -u tomcat:tomcat \
+        //     --upload-file target/tomcat-demo.war \
+        //     'http://tomcat-host:8080/manager/text/deploy?path=/tomcat-demo&update=true'
+        // """
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'Pipeline completed successfully.'
+    }
+    failure {
+      echo 'Pipeline failed.'
+    }
+  }
+}
